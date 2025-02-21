@@ -7,6 +7,7 @@ It currently features:
 - A [slab allocator](https://en.wikipedia.org/wiki/Slab_allocation) to efficiently allocate general-purpose, virtually mapped memory to kernel components
 - Pre-emptive, software-based multitasking with a round robin scheduler
 - User-mode tasks with their own virtual address space
+- A unit testing framework for testing of kernel components such as the memory allocators
 
 I'm currently working on:
 - A Virtual File System (VFS) layer akin to the Linux implementation
