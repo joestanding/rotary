@@ -1,0 +1,11 @@
+*.o
+*.bin
+*.elf
+*.sym
+output
+bx_enh_dbg.ini
+serial.txt
+com*.txt
+*.log
+build-*.sh
+.github

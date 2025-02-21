@@ -1,0 +1,2 @@
+ldsym global "build/output/kernel-bochs.sym"
+continue
