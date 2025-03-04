@@ -9,6 +9,7 @@
 #include <rotary/core.h>
 #include <rotary/panic.h>
 #include <rotary/debug.h>
+#include <rotary/string.h>
 #include <rotary/util/math.h>
 #include <rotary/logging.h>
 #include <rotary/mm/kmalloc.h>
@@ -22,11 +23,13 @@
 /* ------------------------------------------------------------------------- */
 
 /* States */
-#define TASK_STATE_INVALID      0
-#define TASK_STATE_RUNNING      1
-#define TASK_STATE_WAITING      2
-#define TASK_STATE_PAUSED       4
-#define TASK_STATE_KILLED       5
+typedef enum {
+    TASK_STATE_INVALID = 0,
+    TASK_STATE_RUNNING = 1,
+    TASK_STATE_WAITING = 2,
+    TASK_STATE_PAUSED  = 3,
+    TASK_STATE_KILLED  = 4
+} task_state_t;
 
 /* Limits */
 #define TASK_MAX                8
@@ -56,7 +59,7 @@ struct task {
     /* Basic information */
     uint32_t id;
     uint32_t type;
-    uint32_t state;
+    task_state_t state;
     uint32_t priority;
     uint32_t ticks;
 
@@ -86,22 +89,32 @@ struct task {
 /* ------------------------------------------------------------------------- */
 
 int32_t  task_init();
+
 struct task * task_create(char * name, uint32_t type, void * start_addr,
-                     uint32_t priority, uint32_t state);
+                          uint32_t priority, uint32_t state);
+struct task * task_alloc_struct(char * name, uint32_t type, void * start_addr,
+                                uint32_t priority, uint32_t state);
+                            
+int32_t  task_create_vm_space(struct task * task);
+void     task_destroy_vm_space(struct task * task);
 
 int32_t  task_create_kernel_stack(struct task * new_task);
-int32_t  task_create_descriptors(struct task * new_task);
+void     task_destroy_kernel_stack(struct task * task);
 
 int32_t  task_kill(uint32_t task_id);
 int32_t  task_purge(uint32_t task_id);
 int32_t  task_exit_current();
-struct task * task_get_current();
-struct task * task_get_from_id(uint32_t task_id);
+
 void     task_schedule();
+void     task_purge_killed_tasks();
+
 void     task_print();
 void     task_enable_scheduler();
 void     task_disable_scheduler();
 void     task_add_to_scheduler(struct task * new_task);
+
+struct task * task_get_current();
+struct task * task_get_from_id(uint32_t task_id);
 
 /* ------------------------------------------------------------------------- */
 
