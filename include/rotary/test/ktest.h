@@ -93,6 +93,17 @@ void ktest_list_modules();
         .test_count  = ARRAY_SIZE((tsts)) \
     }
 
+#define assert(condition) \
+    do { \
+        if (!(condition)) { \
+            klog("[%s] ASSERTION FAILED: %s (file %s, line %d)\n", \
+                 ktest->name, #condition, __FILE__, __LINE__); \
+            ktest->fail_count++; \
+        } else { \
+            ktest->pass_count++; \
+        } \
+    } while (0)
+
 #define assert_equal(expected, actual) \
     do { \
         _Generic((expected), \
