@@ -13,6 +13,7 @@
 
 #include <rotary/core.h>
 #include <rotary/list.h>
+#include <rotary/mm/kmalloc.h>
 #include <rotary/fs/vfs/fs_type.h>
 #include <rotary/fs/vfs/inode.h>
 #include <rotary/fs/vfs/super.h>
@@ -40,6 +41,12 @@ struct super_block {
 struct super_block_ops {
 
 };
+
+/* ------------------------------------------------------------------------- */
+
+struct super_block * super_block_alloc(struct file_system_type * fs);
+void super_block_init(struct super_block * sb);
+void super_block_register(struct super_block * sb);
 
 /* ------------------------------------------------------------------------- */
 

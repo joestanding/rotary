@@ -23,6 +23,15 @@ struct inode_ops;
 
 /* ------------------------------------------------------------------------- */
 
+#define INIT_INODE(inode, mode, ops, _sb) \
+    {                                     \
+        (_inode)->mode = (_mode);            \
+        (_inode)->ops = (_ops);              \
+        (_inode)->sb = (_sb);                \
+    }
+
+/* ------------------------------------------------------------------------- */
+
 struct inode {
     uint32_t mode; /* File type - regular, directory, symlink, etc. */
     struct inode_ops * ops;
@@ -30,7 +39,7 @@ struct inode {
 };
 
 struct inode_ops {
-
+    int (*lookup) (struct inode * dir_node, const char * name, size_t len, struct inode * result);
 };
 
 /* ------------------------------------------------------------------------- */

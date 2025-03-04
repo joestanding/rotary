@@ -5,6 +5,7 @@
 
 #include <rotary/arch_init.h>
 #include <rotary/mm/slab.h>
+#include <rotary/fs/vfs/root.h>
 #include <rotary/core/shell.h>
 
 /* ------------------------------------------------------------------------- */
@@ -144,6 +145,10 @@ int32_t arch_init(uint32_t arg1, uint32_t arg2) {
         return E_ERROR;
     }
     printk(LOG_INFO, OK_STR);
+
+    printk(LOG_INFO, "Mounting root filesystem..             ");
+    mount_root_testing();
+
 
     task_create("shell", TASK_KERNEL, &shell_init, TASK_PRIORITY_MIN,
                 TASK_STATE_WAITING);

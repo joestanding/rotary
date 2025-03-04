@@ -23,10 +23,12 @@ struct pseudo_node {
 
 /* ------------------------------------------------------------------------- */
 
+/*
 static inline void pseudo_register_child(struct pseudo_node parent,
                                          struct pseudo_node child) {
     llist_
 }
+*/
 
 /* ------------------------------------------------------------------------- */
 

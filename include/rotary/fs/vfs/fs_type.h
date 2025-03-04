@@ -1,8 +1,6 @@
 /*
  * include/rotary/fs/vfs/fs_type.h
  * File System Data and Functions
- *
- * The file system type structure defines 
  */
 
 #ifndef INC_FS_VFS_TYPE_H
