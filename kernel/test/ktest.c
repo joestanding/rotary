@@ -105,7 +105,7 @@ void assert_not_equal_ptr(ktest_unit_t * ktest, void *expected, void *actual,
 
 void assert_not_equal_str(ktest_unit_t * ktest, char *expected,
                           char *actual, char * file, int line) {
-    if (strcmp(expected, actual) == 0) {
+    if (strcmp(expected, actual) != 0) {
         klog("[%s] ASSERTION FAILED! Expected strings to differ: \"%s\" == \"%s\" (in file %s, line %d)\n",
              ktest->name, expected, actual, file, line);
         ktest->fail_count++;
@@ -155,11 +155,7 @@ void ktest_run_all() {
 /* ------------------------------------------------------------------------- */
 
 void ktest_run_module(char * module_name) {
-    ktest_module_t * module = NULL;
-    for (module = __start_ktest; module < __stop_ktest; module++) {
-        if(strcmp(module->name, module_name) != 0)
-            break;
-    }
+    ktest_module_t * module = ktest_get_module(module_name);
 
     if(!module) {
         klog("ktest_run_module(): No module with name '%s' found!\n",
@@ -218,6 +214,18 @@ void ktest_run_module(char * module_name) {
 
     klog("======================\n");
     klog("\n");
+}
+
+/* ------------------------------------------------------------------------- */
+
+ktest_module_t * ktest_get_module(char * module_name) {
+    ktest_module_t * module = NULL;
+    for (module = __start_ktest; module < __stop_ktest; module++) {
+        if(strcmp(module->name, module_name) == 0) {
+            return module;
+        }
+    }
+    return NULL;
 }
 
 /* ------------------------------------------------------------------------- */

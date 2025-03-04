@@ -61,6 +61,7 @@ void _assert_bit_set(ktest_unit_t * ktest, unsigned int buffer,
 
 void ktest_run_all();
 void ktest_run_module(char * module_name);
+ktest_module_t * ktest_get_module(char * module_name);
 void ktest_list_modules();
 
 /* ------------------------------------------------------------------------- */
