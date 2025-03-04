@@ -1,5 +1,5 @@
 /*
- * kernel/string.c
+ * kernel/core/string.c
  * String Processing Functions
  *
  * Basic functions for string operations, such as copying.
@@ -17,59 +17,48 @@ void * memset(void *dest, int value, size_t n) {
     return dest;
 }
 
-
 /* ------------------------------------------------------------------------- */
 
-void * memcpy(void * dest, void * src, uint32_t size) {
-    char * d = dest;
-    char * s = src;
-    while (size--)
+void * memcpy(void *dest, const void *src, size_t n) {
+    const unsigned char *s = src;
+    unsigned char *d = dest;
+    while (n--) {
         *d++ = *s++;
+    }
     return dest;
 }
 
 /* ------------------------------------------------------------------------- */
 
-void int_to_str(int32_t num, char * dest)
-{
+void int_to_str(int32_t num, char *dest) {
     int i = 0;
     int isNegative = 0;
 
-    // Handle 0 explicitly, otherwise empty string is printed for 0
-    if (num == 0)
-    {
+    if (num == 0) {
         dest[i++] = '0';
         dest[i] = '\0';
         return;
     }
 
-    // Check if number is negative
-    if (num < 0)
-    {
+    if (num < 0) {
         isNegative = 1;
-        num = -num; // Make number positive
+        num = -num;
     }
 
-    // Process individual digits
-    while (num != 0)
-    {
+    while (num != 0) {
         int rem = num % 10;
         dest[i++] = rem + '0';
         num = num / 10;
     }
 
-    // If number is negative, append '-'
     if (isNegative)
         dest[i++] = '-';
 
-    // Terminate string
     dest[i] = '\0';
 
-    // Reverse the string
     int start = 0;
     int end = i - 1;
-    while (start < end)
-    {
+    while (start < end) {
         char temp = dest[start];
         dest[start] = dest[end];
         dest[end] = temp;
@@ -78,37 +67,24 @@ void int_to_str(int32_t num, char * dest)
     }
 }
 
-
 /* ------------------------------------------------------------------------- */
 
-void uint_to_str(uint32_t num, char * dest)
-{
+void uint_to_str(uint32_t num, char *dest) {
     int i = 0;
-
-    // Handle 0 explicitly, otherwise empty string is printed for 0
-    if (num == 0)
-    {
+    if (num == 0) {
         dest[i++] = '0';
         dest[i] = '\0';
         return;
     }
-
-    // Process individual digits
-    while (num != 0)
-    {
+    while (num != 0) {
         int rem = num % 10;
         dest[i++] = rem + '0';
         num = num / 10;
     }
-
-    // Terminate string
     dest[i] = '\0';
-
-    // Reverse the string
     int start = 0;
     int end = i - 1;
-    while (start < end)
-    {
+    while (start < end) {
         char temp = dest[start];
         dest[start] = dest[end];
         dest[end] = temp;
@@ -119,20 +95,33 @@ void uint_to_str(uint32_t num, char * dest)
 
 /* ------------------------------------------------------------------------- */
 
-void int_to_hex_str(uint32_t num, char * dest) {
-  int i;
-  char hex_digits[] = "0123456789abcdef";
-  
-  for (i = 0; i < 8; i++) {
-    dest[7-i] = hex_digits[num & 0xf];
-    num >>= 4;
-  }
-  dest[8] = '\0';
+void int_to_hex_str(uint32_t num, char *dest) {
+    char hex_digits[] = "0123456789abcdef";
+    char temp[9]; /* Max 8 hex digits + null terminator */
+    int i = 0;
+    int leading = 1; /* Flag to skip leading zeroes */
+
+    if (num == 0) { /* Special case: Zero should be "0" */
+        dest[0] = '0';
+        dest[1] = '\0';
+        return;
+    }
+
+    for (int j = 7; j >= 0; j--) {
+        char digit = hex_digits[(num >> (j * 4)) & 0xF];
+        if (digit != '0' || !leading) {
+            temp[i++] = digit;
+            leading = 0; /* Found the first non-zero digit, stop skipping */
+        }
+    }
+
+    temp[i] = '\0';
+    strcpy(dest, temp);
 }
 
 /* ------------------------------------------------------------------------- */
 
-void fill_buffer(char* dest_buf, uint32_t * dest_index, char c, int count) {
+void fill_buffer(char *dest_buf, uint32_t *dest_index, char c, int count) {
     for (int i = 0; i < count; i++) {
         dest_buf[(*dest_index)++] = c;
     }
@@ -140,7 +129,7 @@ void fill_buffer(char* dest_buf, uint32_t * dest_index, char c, int count) {
 
 /* ------------------------------------------------------------------------- */
 
-void sprintf(char *dest_buf, char *format_str, ...) {
+int sprintf(char *dest_buf, const char *format_str, ...) {
     __builtin_va_list list;
     __builtin_va_start(list, format_str);
 
@@ -148,22 +137,21 @@ void sprintf(char *dest_buf, char *format_str, ...) {
     uint32_t processed = 0;
     uint32_t dest_index = 0;
 
-    // Iterate until the end of the string
     while (format_str[index] != '\0') {
         if (format_str[index] == '%') {
             char num[32];
-            memset(&num, 0, sizeof(num));
+            memset(num, 0, sizeof(num));
 
-            // Copy characters before the format specifier
+            // Copy literal text before the format specifier.
             while (processed < index) {
                 dest_buf[dest_index++] = format_str[processed++];
             }
 
-            index++; // move past '%'
+            index++; // Move past '%'
 
-            // Padding
+            // Process optional padding.
             int padding = 0;
-            while(format_str[index] >= '0' && format_str[index] <= '9') {
+            while (format_str[index] >= '0' && format_str[index] <= '9') {
                 padding = padding * 10 + (format_str[index] - '0');
                 index++;
             }
@@ -171,181 +159,181 @@ void sprintf(char *dest_buf, char *format_str, ...) {
             int length = 0;
 
             switch (format_str[index]) {
-                case 's':
-                    {
+                case 's': {
                         char *str_arg = __builtin_va_arg(list, char*);
-                        // Padding
                         length = strlen(str_arg);
                         if (padding > length) {
                             fill_buffer(dest_buf, &dest_index, '0', padding - length);
                         }
-                        // Concatenate the string argument
                         while (*str_arg != '\0') {
                             dest_buf[dest_index++] = *str_arg++;
                         }
                     }
                     break;
-                case 'd':
-                    int_to_str(__builtin_va_arg(list, int), (char*)&num);
-                    // Padding
-                    length = strlen(num);
-                    if (padding > length) {
-                        fill_buffer(dest_buf, &dest_index, '0', padding - length);
-                    }
-                    // Concatenate the decimal number
-                    char *num_ptr = num;
-                    while (*num_ptr != '\0') {
-                        dest_buf[dest_index++] = *num_ptr++;
-                    }
-                    break;
-                case 'u':
-                    uint_to_str(__builtin_va_arg(list, unsigned int), num);
-                    // Padding
-                    length = strlen(num);
-                    if (padding > length) {
-                        fill_buffer(dest_buf, &dest_index, '0', padding - length);
-                    }
-                    // Concatenate the unsigned decimal number
-                    char *unum_ptr = num;
-                    while (*unum_ptr != '\0') {
-                        dest_buf[dest_index++] = *unum_ptr++;
+                case 'd': {
+                        int_to_str(__builtin_va_arg(list, int), num);
+                        length = strlen(num);
+                        if (padding > length) {
+                            fill_buffer(dest_buf, &dest_index, '0', padding - length);
+                        }
+                        char *num_ptr = num;
+                        while (*num_ptr != '\0') {
+                            dest_buf[dest_index++] = *num_ptr++;
+                        }
                     }
                     break;
-                case 'x':
-                    int_to_hex_str(__builtin_va_arg(list, int), num);
-                    // Padding
-                    length = strlen(num);
-                    if (padding > length) {
-                        fill_buffer(dest_buf, &dest_index, '0', padding - length);
-                    }
-                    // Concatenate the hexadecimal number
-                    char *hex_ptr = num;
-                    while (*hex_ptr != '\0') {
-                        dest_buf[dest_index++] = *hex_ptr++;
+                case 'u': {
+                        uint_to_str(__builtin_va_arg(list, unsigned int), num);
+                        length = strlen(num);
+                        if (padding > length) {
+                            fill_buffer(dest_buf, &dest_index, '0', padding - length);
+                        }
+                        char *unum_ptr = num;
+                        while (*unum_ptr != '\0') {
+                            dest_buf[dest_index++] = *unum_ptr++;
+                        }
                     }
                     break;
-                case 'c':
-                    // Padding
-                    if (padding > 1) {
-                        fill_buffer(dest_buf, &dest_index, '0', padding - 1);
+                case 'x': {
+                        int_to_hex_str(__builtin_va_arg(list, int), num);
+                        length = strlen(num);
+                        if (padding > length) {
+                            fill_buffer(dest_buf, &dest_index, '0', padding - length);
+                        }
+                        char *hex_ptr = num;
+                        while (*hex_ptr != '\0') {
+                            dest_buf[dest_index++] = *hex_ptr++;
+                        }
                     }
-                    // Concatenate the character
-                    dest_buf[dest_index++] = __builtin_va_arg(list, int);
+                    break;
+                case 'c': {
+                        if (padding > 1) {
+                            fill_buffer(dest_buf, &dest_index, '0', padding - 1);
+                        }
+                        dest_buf[dest_index++] = __builtin_va_arg(list, int);
+                    }
+                    break;
+                default:
+                    // For unknown specifiers, copy the character as is.
+                    dest_buf[dest_index++] = format_str[index];
                     break;
             }
 
-            processed = index + 1; // index is already moved past the format character
+            processed = index + 1;
         }
         index++;
     }
 
-    // Copy characters after the last format specifier
+    // Copy any remaining characters.
     while (processed < index) {
         dest_buf[dest_index++] = format_str[processed++];
     }
     
-    dest_buf[dest_index] = '\0'; // Null-terminating the destination buffer
+    dest_buf[dest_index] = '\0';
     __builtin_va_end(list);
+    return dest_index;
 }
 
 /* ------------------------------------------------------------------------- */
 
-int strcmp(const char * str1, const char * str2) {
-    if(strlen(str1) != strlen(str2))
-        return 0;
-
-    for(uint32_t i = 0; i < strlen(str1); i++ ) {
-        if(str1[i] != str2[i]) {
-            return 0;
-        }
+int strcmp(const char *s1, const char *s2) {
+    while (*s1 && (*s1 == *s2)) {
+        s1++;
+        s2++;
     }
-
-    return 1;
+    return ((unsigned char)*s1 - (unsigned char)*s2);
 }
 
 /* ------------------------------------------------------------------------- */
 
-void strcpy(char * dest_buf, char * src_buf) {
-    uint32_t i = 0;
-    while(*(dest_buf+i) != 0x00) {
-        *(dest_buf+i) = src_buf[i];
-        i++;
-    }
-    *(dest_buf + ++i) = 0x00;
+char * strcpy(char *dest, const char *src) {
+    char *d = dest;
+    while ((*d++ = *src++));
+    return dest;
 }
 
 /* ------------------------------------------------------------------------- */
 
-void strncpy(char * dest_buf, char * src_buf, uint32_t n) {
-    for(uint32_t i = 0; i < n; i++) {
-        *(dest_buf+i) = src_buf[i];
-    }
+char * strncpy(char *dest, const char *src, size_t n) {
+    size_t i;
+    for (i = 0; i < n && src[i] != '\0'; i++)
+        dest[i] = src[i];
+    for (; i < n; i++)
+        dest[i] = '\0';
+    return dest;
 }
 
 /* ------------------------------------------------------------------------- */
 
-char * strcat(char * str1, char * str2) {
-    uint32_t str1_len = strlen(str1);
-    uint32_t str2_len = strlen(str2);
-    uint32_t i;
-    for(i = 0; i < str2_len; i++) {
-        str1[str1_len+i] = str2[i];
+char * strcat(char *str1, const char *str2) {
+    size_t str1_len = strlen(str1);
+    size_t i;
+    for (i = 0; str2[i] != '\0'; i++) {
+        str1[str1_len + i] = str2[i];
     }
-    str1[str1_len+i] = '\0';
+    str1[str1_len + i] = '\0';
     return str1;
 }
 
 /* ------------------------------------------------------------------------- */
 
-uint32_t strlen(const char * string) {
-    for(uint32_t i = 0; i < MAX_STRING_LEN; i++) {
-        if(string[i] == '\0')
-            return i;
+size_t strlen(const char *string) {
+    size_t i = 0;
+    while (i < MAX_STRING_LEN && string[i] != '\0') {
+        i++;
     }
-    return -1;
+    return i;
 }
 
 /* ------------------------------------------------------------------------- */
 
-// https://www.geeksforgeeks.org/implement-itoa/
-
-void reverse(char * str, int length) {
-	int start = 0;
-	int end = length - 1;
-	while(start < end) {
-        uint8_t temp = *(str+start);
-		*(str+start) = *(str+end);
-        *(str+end) = temp;
-		start++;
-		end--;
-	}
+void reverse(char *str, int length) {
+    int start = 0;
+    int end = length - 1;
+    while (start < end) {
+        uint8_t temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
 }
 
 /* ------------------------------------------------------------------------- */
 
-void itoa(uint32_t num, char* dec_string) {
-    int i;
-    uint32_t divisor = 1000000000;
-    int leading_zeroes = 1;
-    for (i = 0; i < 10; i++) {
+void itoa(uint32_t num, char *dec_string) {
+    if (num == 0) {
+        dec_string[0] = '0';
+        dec_string[1] = '\0';
+        return;
+    }
+    int i = 0;
+    for (uint32_t divisor = 1000000000; divisor > 0; divisor /= 10) {
         int digit = num / divisor;
-        if (digit != 0 || !leading_zeroes) {
-            dec_string[i] = digit + '0';
-            leading_zeroes = 0;
+        if (digit || i > 0) {
+            dec_string[i++] = digit + '0';
         }
         num %= divisor;
-        divisor /= 10;
     }
-    dec_string[10] = '\0';
+    dec_string[i] = '\0';
 }
 
 /* ------------------------------------------------------------------------- */
 
-int atoi(char * str) {
+int atoi(const char *str) {
     int res = 0;
-    for(int i = 0; str[i] != '\0'; ++i)
-        res = res * 10 + str[i] - '0';
-    return res;
+    int sign = 1;
+    int i = 0;
+    if (str[i] == '-') {
+        sign = -1;
+        i++;
+    } else if (str[i] == '+') {
+        i++;
+    }
+    for (; str[i] != '\0'; i++) {
+        res = res * 10 + (str[i] - '0');
+    }
+    return sign * res;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -356,31 +344,23 @@ void format_size(uint32_t bytes, char *dest) {
     uint32_t base = 1024;
     uint32_t whole_part, fraction_part;
 
-    // Reduce bytes progressively until they fit the correct unit
     while (bytes >= base && suffix_index < 4) {
         bytes /= base;
         suffix_index++;
     }
 
-    // Whole part is just the reduced bytes
     whole_part = bytes;
-
-    // Handle fraction part for more precision
     fraction_part = ((bytes * 1024) % base) * 10 / base;
 
-    // Format into the destination buffer (e.g., "4.2KB")
     int_to_str(whole_part, dest);
     int len = strlen(dest);
 
-    // Add the fractional part only if it's non-zero
     if (fraction_part > 0) {
         dest[len++] = '.';
-        dest[len++] = '0' + fraction_part; // Add fractional part
+        dest[len++] = '0' + fraction_part;
     }
 
-    dest[len] = '\0'; // Null-terminate the string
-
-    // Add the appropriate unit suffix
+    dest[len] = '\0';
     strcat(dest, suffixes[suffix_index]);
 }
 
@@ -389,3 +369,4 @@ void format_size(uint32_t bytes, char *dest) {
 #include "test/string.c"
 
 /* ------------------------------------------------------------------------- */
+
