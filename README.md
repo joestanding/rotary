@@ -19,6 +19,10 @@ Much of Rotary's implementation is influenced by the Linux kernel, which I studi
 
 Although the project currently only supports 32-bit x86, architecture-specific code is separated into its own directories and support for new architectures can be added by implementing the necessary functionality within architecture-specific code.
 
+### Documentation
+
+High-level documentation for the project can be found at [Rotary Docs](https://rotary.joestanding.co.uk), which provides information on the various subsystems and their implementations. This documentation is intended to give a simple overview of the project's architecture.
+
 ### Directory Structure
 
 The directory structure is relatively simple, with the following layout:
