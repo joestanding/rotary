@@ -100,8 +100,9 @@ struct task * ktask1 = NULL;
 
 void shell_process_command(char * command) {
 
-#include <rotary/fs/pseudo/tree.h>
-    if(strcmp(command, "pseudo") != 0) {
+    /*
+    #include <rotary/fs/pseudo/tree.h>
+    if(strcmp(command, "pseudo") == 0) {
 
         struct pseudo_node dir1;
         dir1.name = "example_dir";
@@ -116,15 +117,12 @@ void shell_process_command(char * command) {
         dir1_child1.next = NULL;
 
         dir1.children
-
-
-
-        
     }
+    */
 
 
 
-    if(strcmp(command, "kt") != 0) {
+    if(strcmp(command, "kt") == 0) {
         ktask1 = task_create("ktask_test1", TASK_KERNEL, &apple,
                                        TASK_PRIORITY_MIN,
                                        TASK_STATE_WAITING);
@@ -136,7 +134,7 @@ void shell_process_command(char * command) {
     }
 
 #include <rotary/fs/vfs/fs_type.h>
-    if(strcmp(command, "fstype")) {
+    if(strcmp(command, "fstype") == 0) {
         file_system_type_print_debug();
 
         struct file_system_type fs_type = {
@@ -158,24 +156,31 @@ void shell_process_command(char * command) {
 
     }
     
-    if(strcmp(command, "vm-test")) {
+    if(strcmp(command, "vm-test") == 0) {
         ktest_run_module("vm");
     }
 
-    if(strcmp(command, "palloc-test")) {
+    if(strcmp(command, "string-test") == 0) {
+        ktest_run_module("string");
+    }
+
+    if(strcmp(command, "slab-test") == 0) {
+        ktest_run_module("awodawd");
+    }
+
+    if(strcmp(command, "palloc-test") == 0) {
         ktest_run_module("palloc");
     }
 
-
-    if(strcmp(command, "run-tests")) {
+    if(strcmp(command, "run-tests") == 0) {
         ktest_run_all();
     }
 
-    if(strcmp(command, "dump-kmalloc")) {
+    if(strcmp(command, "dump-kmalloc") == 0) {
         kmalloc_print_debug();
     }
 
-    if(strcmp(command, "ut") != 0) {
+    if(strcmp(command, "ut") == 0) {
         struct task * task = task_create("utask_test1", TASK_USERMODE, (void*)0x400000,
                     TASK_PRIORITY_MIN, TASK_STATE_WAITING);
         struct vm_map * map = vm_map_new();
@@ -185,32 +190,32 @@ void shell_process_command(char * command) {
         return;
     }
 
-    if(strcmp(command, "clear") != 0 || strcmp(command, "cls") != 0) {
+    if(strcmp(command, "clear") == 0 || strcmp(command, "cls") == 0) {
         for(uint32_t i = 4; i < VGA_HEIGHT; i++) {
             vga_clear_line(i);
         }
         return;
     }
 
-    if(strcmp(command, "build") != 0) {
+    if(strcmp(command, "build") == 0) {
         vga_printf("Kernel built: %s %s", __DATE__, __TIME__);
         return;
     }
 
-    if(strcmp(command, "tasks") != 0) {
+    if(strcmp(command, "tasks") == 0) {
         task_print();
         return;
     }
 
-    if(strcmp(command, "slab") != 0) {
+    if(strcmp(command, "slab") == 0) {
         kmalloc_print_debug();
     }
 
-    if(strcmp(command, "buddy") != 0) {
+    if(strcmp(command, "buddy") == 0) {
         buddy_print_debug();
     }
 
-    if(strcmp(command, "mem") != 0) {
+    if(strcmp(command, "mem") == 0) {
         //paging_print_debug();
         klog("\n");
         buddy_print_debug();
