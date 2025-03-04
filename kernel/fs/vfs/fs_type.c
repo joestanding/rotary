@@ -25,7 +25,7 @@ void file_system_type_unregister(struct file_system_type * fs_type) {
     lock(&fs_list_lock);
     struct file_system_type * curr_entry;
     clist_for_each(curr_entry, &fs_list_head, fs_list_entry) {
-        if(strcmp(curr_entry->name, fs_type->name) != 0) {
+        if(strcmp(curr_entry->name, fs_type->name) == 0) {
             clist_delete_node(&curr_entry->fs_list_entry);
         }
     }
@@ -38,7 +38,7 @@ struct file_system_type * file_system_type_get(const char * name) {
     lock(&fs_list_lock);
     struct file_system_type * curr_entry;
     clist_for_each(curr_entry, &fs_list_head, fs_list_entry) {
-        if(strcmp(curr_entry->name, name) != 0) {
+        if(strcmp(curr_entry->name, name) == 0) {
             unlock(&fs_list_lock);
             return curr_entry;
         }
