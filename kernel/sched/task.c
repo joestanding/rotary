@@ -137,10 +137,10 @@ struct task * task_create(char * name, uint32_t type, void * start_addr,
     if(!SUCCESS(task_create_vm_space(new_task))) {
         goto cleanup;
     }
-    
-    /* Perform architecture-specific task initialisation
-     * This will include operations such as setting up arch-specific structures
-     * on the stack, to be used in task switching code */
+
+    /* Perform architecture-specific task initialisation - this will include
+     * operations such as setting up arch-specific structures on the stack, to
+     * be used in task switching code */
     if(!SUCCESS(arch_task_create(new_task))) {
         klog("Arch-specific task create failed!\n");
         unlock(&task_lock);
@@ -155,7 +155,7 @@ struct task * task_create(char * name, uint32_t type, void * start_addr,
 
     klog("Finished task creation: '%s' (PID %D)\n", new_task->name,
                                                     new_task->id);
-    
+
     return new_task;
 
 /* Cleanup on failure */
