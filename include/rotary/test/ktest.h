@@ -109,6 +109,7 @@ void ktest_list_modules();
         _Generic((expected), \
             int: assert_equal_int, \
             unsigned int: assert_equal_uint, \
+            char: assert_equal_int, \
             char*: assert_equal_str, \
             default: assert_equal_ptr \
         )(ktest, expected, actual, __FILE__, __LINE__); \
@@ -119,6 +120,7 @@ void ktest_list_modules();
         _Generic((expected), \
             int: assert_not_equal_int, \
             unsigned int: assert_not_equal_uint, \
+            char: assert_not_equal_int, \
             char*: assert_not_equal_str, \
             default: assert_not_equal_ptr \
         )(ktest, expected, actual, __FILE__, __LINE__); \
